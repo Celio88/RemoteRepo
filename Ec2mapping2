@@ -1,0 +1,64 @@
+# Deploy EC2 Using a Mapping to Dynamically Retrieve AMI Based on Region
+ 
+ 
+# CREATE MAPPING SECTION FOR AMI
+Mappings:
+  AMIIDMap:
+    us-east-1:
+      MyAMI1: ami-0fff1b9a61dec8a5f
+    us-west-1:
+      MyAMI1: ami-09b2477d43bc5d0ac
+    eu-west-1:
+      MyAMI1: ami-054a53dca63de757b
+    ap-northeast-1:
+      MyAMI1: ami-0ef29ab52ff72213b
+    ap-southeast-1:
+      MyAMI1: ami-0ad522a4a529e7aa8
+ 
+     
+# create instance
+Resources:
+  myEC2Instance:
+   Type: "AWS::EC2::Instance"
+   Properties:
+      VpcId: !Ref VpcIdd
+      ImageId:  !FindInMap [AMIIDMap, !Ref "AWS::Region", MyAMI1]
+      InstanceType:  !Ref InstanceTypeParameter
+      SubnetId: !Ref ec2PublicSubnetId
+      KeyName: !Ref ec2KeyName
+      SecurityGroupIds:
+       - !Ref ec2securitygroup
+   
+ 
+ 
+ 
+# CREATE PARAMETER SECTION
+Parameters:
+ 
+  # ec2 instance type
+  InstanceTypeParameter:
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+ 
+ 
+  # the VPC in wich i wich to launch my ec2  
+  VpcIdd:
+    Description: ID of an existing Virtual Private Cloud (VPC).
+    Type: 'AWS::EC2::VPC::Id'
+ 
+  ec2PublicSubnetId:
+    Description: ID of an existing public subnet within the specified VPC.
+    Type: 'AWS::EC2::Subnet::Id'
+  ec2KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance.
+    Type: 'AWS::EC2::KeyPair::KeyName'
+ 
+  ec2securitygroup:
+    Description: Name of the and existing securitygroup for ec2 instance
+    Type: 'AWS::EC2::SecurityGroup::Id'
+    
